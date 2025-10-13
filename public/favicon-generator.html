@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Favicon Generator for AURA "vibes"</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #f0f0f0;
+        }
+        .favicon-preview {
+            display: inline-block;
+            margin: 10px;
+            text-align: center;
+        }
+        .favicon-16 { width: 16px; height: 16px; }
+        .favicon-32 { width: 32px; height: 32px; }
+        .favicon-48 { width: 48px; height: 48px; }
+        canvas {
+            border: 1px solid #ccc;
+            margin: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>AURAvibes Favicon Generator</h1>
+    <p>This page generates favicons for AURAvibes. Right-click and save the canvas images as favicon.ico</p>
+    
+    <div class="favicon-preview">
+        <h3>16x16</h3>
+        <canvas id="canvas16" width="16" height="16"></canvas>
+    </div>
+    
+    <div class="favicon-preview">
+        <h3>32x32</h3>
+        <canvas id="canvas32" width="32" height="32"></canvas>
+    </div>
+    
+    <div class="favicon-preview">
+        <h3>48x48</h3>
+        <canvas id="canvas48" width="48" height="48"></canvas>
+    </div>
+
+    <script>
+        function drawFavicon(canvas, size) {
+            const ctx = canvas.getContext('2d');
+            const center = size / 2;
+            const radius = size * 0.4;
+            
+            // Create gradient
+            const gradient = ctx.createRadialGradient(center * 0.7, center * 0.7, 0, center, center, radius);
+            gradient.addColorStop(0, '#FF6B6B');
+            gradient.addColorStop(0.5, '#FF8E53');
+            gradient.addColorStop(1, '#FF6B9D');
+            
+            // Draw main circle
+            ctx.fillStyle = gradient;
+            ctx.beginPath();
+            ctx.arc(center, center, radius, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            // Draw white border
+            ctx.strokeStyle = '#fff';
+            ctx.lineWidth = size * 0.03;
+            ctx.stroke();
+            
+            // Draw quote marks
+            ctx.fillStyle = 'white';
+            const quoteSize = size * 0.15;
+            const quoteY = center - quoteSize * 0.5;
+            
+            // Left quote mark
+            ctx.fillRect(center - quoteSize * 1.5, quoteY, quoteSize * 0.3, quoteSize);
+            ctx.fillRect(center - quoteSize * 1.2, quoteY, quoteSize * 0.6, quoteSize * 0.3);
+            
+            // Right quote mark
+            ctx.fillRect(center + quoteSize * 0.2, quoteY, quoteSize * 0.3, quoteSize);
+            ctx.fillRect(center + quoteSize * 0.5, quoteY, quoteSize * 0.6, quoteSize * 0.3);
+            
+            // Accent circles
+            ctx.fillStyle = '#FFD93D';
+            ctx.beginPath();
+            ctx.arc(center + radius * 0.4, center - radius * 0.4, size * 0.08, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            ctx.fillStyle = '#FFB6C1';
+            ctx.beginPath();
+            ctx.arc(center - radius * 0.4, center + radius * 0.4, size * 0.06, 0, 2 * Math.PI);
+            ctx.fill();
+        }
+        
+        // Generate all sizes
+        drawFavicon(document.getElementById('canvas16'), 16);
+        drawFavicon(document.getElementById('canvas32'), 32);
+        drawFavicon(document.getElementById('canvas48'), 48);
+    </script>
+</body>
+</html>

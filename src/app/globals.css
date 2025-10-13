@@ -1,0 +1,218 @@
+@import url('https://fonts.googleapis.com/css2?family=Comfortaa:wght@300;400;500;600;700&family=Fredoka:wght@300;400;500;600;700&family=Quicksand:wght@300;400;500;600;700&family=Poppins:wght@100;200;300;400;500;600;700;800;900&family=Inter:wght@100;200;300;400;500;600;700;800;900&family=Space+Grotesk:wght@300;400;500;600;700&family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Caveat:wght@400..700&family=Kalam:wght@300;400;700&family=Permanent+Marker&family=Righteous&family=Bungee&family=Bungee+Shade&family=Creepster&family=Butcherman&family=Nosifer&family=Griffy&family=Rubik+Glitch&family=Rubik+Wet+Paint&family=Rubik+Moonrocks&family=Rubik+Burned&family=Rubik+Distressed&family=Rubik+Marker+Hatch&family=Rubik+Microbe&family=Rubik+Puddles&family=Rubik+Spray+Paint&family=Rubik+Vinyl&family=Rubik+Wet+Paint&family=Rubik+Moonrocks&family=Rubik+Burned&family=Rubik+Distressed&family=Rubik+Marker+Hatch&family=Rubik+Microbe&family=Rubik+Puddles&family=Rubik+Spray+Paint&family=Rubik+Vinyl&display=swap');
+@import "tailwindcss";
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-playfair: var(--font-playfair);
+  --font-space-grotesk: var(--font-space-grotesk);
+  --font-dm-sans: var(--font-dm-sans);
+  --font-caveat: var(--font-caveat);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-dm-sans), system-ui, sans-serif;
+}
+
+/* Original fonts */
+.font-playfair {
+  font-family: var(--font-playfair), serif;
+}
+
+.font-space-grotesk {
+  font-family: var(--font-space-grotesk), sans-serif;
+}
+
+.font-dm-sans {
+  font-family: var(--font-dm-sans), sans-serif;
+}
+
+.font-caveat {
+  font-family: var(--font-caveat), cursive;
+}
+
+/* Viby, funny, cranky, sarcastic font styles for quotes */
+.font-viby-quote {
+  font-family: 'Comfortaa', cursive;
+  font-weight: 600;
+  font-style: italic;
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+  transform: rotate(-1deg);
+}
+
+.font-cranky-quote {
+  font-family: 'Fredoka', cursive;
+  font-weight: 700;
+  text-shadow: 3px 3px 6px rgba(0,0,0,0.4);
+  transform: rotate(0.5deg);
+  letter-spacing: 0.5px;
+}
+
+.font-sarcastic-quote {
+  font-family: 'Quicksand', sans-serif;
+  font-weight: 500;
+  font-style: italic;
+  text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+  transform: rotate(1deg);
+}
+
+.font-funny-quote {
+  font-family: 'Kalam', cursive;
+  font-weight: 400;
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+  transform: rotate(-0.5deg);
+}
+
+.font-wild-quote {
+  font-family: 'Permanent Marker', cursive;
+  font-weight: 400;
+  text-shadow: 3px 3px 6px rgba(0,0,0,0.5);
+  transform: rotate(2deg);
+}
+
+.font-chaotic-quote {
+  font-family: 'Righteous', cursive;
+  font-weight: 400;
+  text-shadow: 4px 4px 8px rgba(0,0,0,0.6);
+  transform: rotate(-2deg);
+  letter-spacing: 1px;
+}
+
+.font-mad-quote {
+  font-family: 'Bungee', cursive;
+  font-weight: 400;
+  text-shadow: 5px 5px 10px rgba(0,0,0,0.7);
+  transform: rotate(3deg);
+  letter-spacing: 2px;
+}
+
+.font-insane-quote {
+  font-family: 'Creepster', cursive;
+  font-weight: 400;
+  text-shadow: 6px 6px 12px rgba(0,0,0,0.8);
+  transform: rotate(-3deg);
+  letter-spacing: 3px;
+}
+
+.font-disturbed-quote {
+  font-family: 'Butcherman', cursive;
+  font-weight: 400;
+  text-shadow: 7px 7px 14px rgba(0,0,0,0.9);
+  transform: rotate(4deg);
+  letter-spacing: 4px;
+}
+
+.font-nightmare-quote {
+  font-family: 'Nosifer', cursive;
+  font-weight: 400;
+  text-shadow: 8px 8px 16px rgba(0,0,0,1);
+  transform: rotate(-4deg);
+  letter-spacing: 5px;
+}
+
+.font-glitch-quote {
+  font-family: 'Rubik Glitch', cursive;
+  font-weight: 400;
+  text-shadow: 9px 9px 18px rgba(0,0,0,1);
+  transform: rotate(5deg);
+  letter-spacing: 6px;
+}
+
+.font-burned-quote {
+  font-family: 'Rubik Burned', cursive;
+  font-weight: 400;
+  text-shadow: 10px 10px 20px rgba(0,0,0,1);
+  transform: rotate(-5deg);
+  letter-spacing: 7px;
+}
+
+.font-distressed-quote {
+  font-family: 'Rubik Distressed', cursive;
+  font-weight: 400;
+  text-shadow: 11px 11px 22px rgba(0,0,0,1);
+  transform: rotate(6deg);
+  letter-spacing: 8px;
+}
+
+.font-microbe-quote {
+  font-family: 'Rubik Microbe', cursive;
+  font-weight: 400;
+  text-shadow: 12px 12px 24px rgba(0,0,0,1);
+  transform: rotate(-6deg);
+  letter-spacing: 9px;
+}
+
+.font-puddles-quote {
+  font-family: 'Rubik Puddles', cursive;
+  font-weight: 400;
+  text-shadow: 13px 13px 26px rgba(0,0,0,1);
+  transform: rotate(7deg);
+  letter-spacing: 10px;
+}
+
+.font-spray-paint-quote {
+  font-family: 'Rubik Spray Paint', cursive;
+  font-weight: 400;
+  text-shadow: 14px 14px 28px rgba(0,0,0,1);
+  transform: rotate(-7deg);
+  letter-spacing: 11px;
+}
+
+.font-vinyl-quote {
+  font-family: 'Rubik Vinyl', cursive;
+  font-weight: 400;
+  text-shadow: 15px 15px 30px rgba(0,0,0,1);
+  transform: rotate(8deg);
+  letter-spacing: 12px;
+}
+
+/* Complementary font styles for other elements */
+.font-elegant-ui {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 300;
+  letter-spacing: 0.5px;
+}
+
+.font-modern-ui {
+  font-family: 'Inter', sans-serif;
+  font-weight: 400;
+  letter-spacing: 0.3px;
+}
+
+.font-playful-ui {
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 500;
+  letter-spacing: 0.7px;
+}
+
+.font-sophisticated-ui {
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 400;
+  letter-spacing: 0.2px;
+}
+
+.font-classy-ui {
+  font-family: 'Playfair Display', serif;
+  font-weight: 400;
+  letter-spacing: 0.4px;
+}
+
+.font-casual-ui {
+  font-family: 'Caveat', cursive;
+  font-weight: 400;
+  letter-spacing: 0.6px;
+}
