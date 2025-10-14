@@ -41,7 +41,6 @@ export class TwitterService {
   private baseUrl = 'https://api.twitter.com/2';
 
   constructor() {
-    // @ts-ignore - process.env is available in Node.js environment
     this.bearerToken = process.env.TWITTER_BEARER_TOKEN || '';
     if (!this.bearerToken) {
       throw new Error('Twitter Bearer Token is required');
@@ -174,7 +173,7 @@ export class TwitterService {
    * Get user's recent tweets by username (convenience method)
    * Optimized for limited API usage - fetches user info and tweets in one call
    */
-  async getUserTweetsByUsername(username: string, maxResults: number = 1): Promise<{ user: TwitterUser; tweets: Tweet[] } | null> {
+  async getUserTweetsByUsername(username: string): Promise<{ user: TwitterUser; tweets: Tweet[] } | null> {
     try {
       // First get user info
       const user = await this.getUserByUsername(username);
@@ -200,7 +199,7 @@ export class TwitterService {
     const tweetTexts = tweets
       .map(tweet => {
         // Remove URLs, mentions, and hashtags for cleaner text
-        let text = tweet.text
+        const text = tweet.text
           .replace(/https?:\/\/\S+/g, '') // Remove URLs
           .replace(/@\w+/g, '') // Remove mentions
           .replace(/#\w+/g, '') // Remove hashtags

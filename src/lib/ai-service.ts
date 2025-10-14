@@ -120,7 +120,6 @@ export async function generateQuote(request: QuoteRequest): Promise<GeneratedQuo
     "liminality"
   ];
 
-  const randomElement = randomElements[Math.floor(Math.random() * randomElements.length)];
   const randomSeed = Math.random().toString(36).substring(7);
 
   // Define word limits based on length
@@ -131,7 +130,7 @@ export async function generateQuote(request: QuoteRequest): Promise<GeneratedQuo
   };
 
   const userPrompt = `Alright, creative chaos module, here's your challenge:
-  - User input: "${request.userInput}" ${randomElement}
+  - User input: "${request.userInput}" ${randomElements[Math.floor(Math.random() * randomElements.length)]}
   - Theme: ${request.theme}
   - Mood: ${request.mood}
   - Length: ${request.length} (${wordLimits[request.length]})
@@ -321,20 +320,6 @@ export async function generateQuoteFromTweets(request: TwitterQuoteRequest): Pro
   }`;
 
   // Add randomness to prevent repetition
-  const randomElements = [
-    "digital soul",
-    "tweet essence",
-    "social media wisdom",
-    "online presence",
-    "virtual thoughts",
-    "internet philosophy",
-    "social wisdom",
-    "digital musings",
-    "tweet philosophy",
-    "online insights"
-  ];
-
-  const randomElement = randomElements[Math.floor(Math.random() * randomElements.length)];
   const randomSeed = Math.random().toString(36).substring(7);
 
   // Define word limits based on length

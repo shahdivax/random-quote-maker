@@ -24,7 +24,7 @@ export async function POST(request: NextRequest) {
     const twitterService = new TwitterService();
 
     // Fetch user and their tweets (limited to 2 for API efficiency)
-    const userData = await twitterService.getUserTweetsByUsername(body.username, 2);
+    const userData = await twitterService.getUserTweetsByUsername(body.username);
     
     if (!userData) {
       return NextResponse.json(
