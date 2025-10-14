@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useRef } from 'react';
-import { motion } from 'framer-motion';
-import { Download, RefreshCw, Sparkles } from 'lucide-react';
+import { useState, useRef, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Download, RefreshCw, Sparkles, X, Monitor, Smartphone, Palette } from 'lucide-react';
 import { GeneratedQuote } from '@/lib/ai-service';
 import { toJpeg } from 'html-to-image';
 
@@ -10,11 +10,22 @@ interface QuoteCardProps {
   quote: GeneratedQuote;
   isDarkMode: boolean;
   onRegenerate: () => void;
+  onModalStateChange?: (hasOpenModal: boolean) => void;
 }
 
-export default function QuoteCard({ quote, isDarkMode, onRegenerate }: QuoteCardProps) {
+export default function QuoteCard({ quote, isDarkMode, onRegenerate, onModalStateChange }: QuoteCardProps) {
   const [isDownloading, setIsDownloading] = useState(false);
+  const [showDownloadModal, setShowDownloadModal] = useState(false);
+  const [showWallpaperModal, setShowWallpaperModal] = useState(false);
+  const [selectedWallpaperFormat, setSelectedWallpaperFormat] = useState<'mobile' | 'desktop' | null>(null);
   const cardRef = useRef<HTMLDivElement>(null);
+
+  // Notify parent when modal states change
+  useEffect(() => {
+    if (onModalStateChange) {
+      onModalStateChange(showDownloadModal || showWallpaperModal);
+    }
+  }, [showDownloadModal, showWallpaperModal, onModalStateChange]);
 
   const getAspectRatioClass = (aspectRatio: string) => {
     const aspectMap: Record<string, string> = {
@@ -152,7 +163,7 @@ export default function QuoteCard({ quote, isDarkMode, onRegenerate }: QuoteCard
     };
   };
 
-  const handleDownload = async () => {
+  const handleDownload = async (is4K: boolean = false) => {
     if (!cardRef.current) return;
 
     setIsDownloading(true);
@@ -160,21 +171,25 @@ export default function QuoteCard({ quote, isDarkMode, onRegenerate }: QuoteCard
       // Wait for fonts to load
       await document.fonts.ready;
       
-      // Use html-to-image which supports modern CSS features like oklab
+      const pixelRatio = is4K ? 8 : 4; // Higher pixel ratio for 4K
+      const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
+      
+      // Use JPEG with proper background capture
       const dataUrl = await toJpeg(cardRef.current, {
-        quality: 0.95, // High quality JPEG (0.95 for excellent quality)
-        pixelRatio: 4, // High resolution
-        backgroundColor: '#ffffff', // White background for JPEG
+        quality: 0.95,
+        pixelRatio,
+        // Remove backgroundColor to preserve the actual background
         style: {
-          transform: 'none', // Remove any transforms
+          transform: 'none',
           position: 'static'
         }
       });
 
+      const filename = `Aura-Vibes-quote-${is4K ? '4K-' : ''}${timestamp}.jpg`;
+
       // Create download link
-      const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
       const link = document.createElement('a');
-      link.download = `Aura-Vibes-quote-${timestamp}.jpg`;
+      link.download = filename;
       link.href = dataUrl;
       
       // Trigger download
@@ -186,6 +201,114 @@ export default function QuoteCard({ quote, isDarkMode, onRegenerate }: QuoteCard
       alert('Download failed. Please try again.');
     } finally {
       setIsDownloading(false);
+      setShowDownloadModal(false);
+    }
+  };
+
+  const handleWallpaperDownload = async (format: 'mobile' | 'desktop', is4K: boolean = true) => {
+    if (!cardRef.current) return;
+
+    setIsDownloading(true);
+    try {
+      await document.fonts.ready;
+      
+      // Fix mobile 4K issue by using lower pixel ratio for mobile
+      const pixelRatio = format === 'mobile' ? (is4K ? 4 : 2) : (is4K ? 8 : 4);
+      const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
+      
+      // Create a temporary element with wallpaper dimensions
+      const tempElement = cardRef.current.cloneNode(true) as HTMLElement;
+      
+      // Set wallpaper dimensions
+      if (format === 'mobile') {
+        tempElement.style.width = '1080px';
+        tempElement.style.height = '1920px';
+        tempElement.style.aspectRatio = '9/16';
+      } else {
+        tempElement.style.width = '3840px';
+        tempElement.style.height = '2160px';
+        tempElement.style.aspectRatio = '16/9';
+      }
+      
+      // Position off-screen
+      tempElement.style.position = 'absolute';
+      tempElement.style.left = '-9999px';
+      tempElement.style.top = '-9999px';
+      tempElement.style.zIndex = '-9999';
+      
+      // Add wallpaper-specific CSS for better text scaling and formatting preservation
+      const wallpaperStyle = document.createElement('style');
+      wallpaperStyle.textContent = `
+        .wallpaper-text {
+          font-size: ${format === 'mobile' ? '48px' : '72px'} !important;
+          line-height: 1.2 !important;
+          font-weight: bold !important;
+        }
+        .wallpaper-author {
+          font-size: ${format === 'mobile' ? '24px' : '36px'} !important;
+          line-height: 1.3 !important;
+          font-weight: 500 !important;
+        }
+        .wallpaper-container {
+          display: flex !important;
+          flex-direction: column !important;
+          justify-content: center !important;
+          align-items: center !important;
+          text-align: center !important;
+          padding: ${format === 'mobile' ? '120px' : '200px'} !important;
+          min-height: 100% !important;
+        }
+      `;
+      document.head.appendChild(wallpaperStyle);
+      
+      // Apply wallpaper classes to text elements
+      const textElements = tempElement.querySelectorAll('div');
+      textElements.forEach((element: any) => {
+        if (element.textContent && element.textContent.includes(quote.quote)) {
+          element.className = 'wallpaper-text';
+        } else if (element.textContent && element.textContent.includes(quote.author)) {
+          element.className = 'wallpaper-author';
+        }
+      });
+      
+      // Apply container class
+      tempElement.className = 'wallpaper-container';
+      
+      document.body.appendChild(tempElement);
+
+      // Use JPEG with proper background capture
+      const dataUrl = await toJpeg(tempElement, {
+        quality: 0.95,
+        pixelRatio,
+        // Remove backgroundColor to preserve the actual background
+        style: {
+          transform: 'none',
+          position: 'static'
+        }
+      });
+
+      const filename = `Aura-Vibes-wallpaper-${format}-${is4K ? '4K-' : ''}${timestamp}.jpg`;
+
+      // Clean up
+      document.body.removeChild(tempElement);
+      document.head.removeChild(wallpaperStyle);
+
+      // Create download link
+      const link = document.createElement('a');
+      link.download = filename;
+      link.href = dataUrl;
+      
+      // Trigger download
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (error) {
+      console.error('Wallpaper download failed:', error);
+      alert('Wallpaper download failed. Please try again.');
+    } finally {
+      setIsDownloading(false);
+      setShowWallpaperModal(false);
+      setSelectedWallpaperFormat(null);
     }
   };
 
@@ -244,12 +367,12 @@ export default function QuoteCard({ quote, isDarkMode, onRegenerate }: QuoteCard
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.6 }}
-        className="flex justify-center space-x-4 mt-6"
+        className="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4 mt-6"
       >
         <motion.button
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
-          onClick={handleDownload}
+          onClick={() => setShowDownloadModal(true)}
           disabled={isDownloading}
           className={`px-6 py-3 rounded-xl font-semibold flex items-center space-x-2 transition-all duration-200 ${
             isDownloading
@@ -272,6 +395,25 @@ export default function QuoteCard({ quote, isDarkMode, onRegenerate }: QuoteCard
         <motion.button
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
+          onClick={() => setShowWallpaperModal(true)}
+          disabled={isDownloading}
+          className={`px-6 py-3 rounded-xl font-semibold flex items-center space-x-2 transition-all duration-200 ${
+            isDownloading
+              ? isDarkMode
+                ? 'bg-slate-600 text-slate-400 cursor-not-allowed'
+                : 'bg-slate-300 text-slate-500 cursor-not-allowed'
+              : isDarkMode
+              ? 'bg-slate-700 hover:bg-slate-600 text-white'
+              : 'bg-white hover:bg-amber-50 text-slate-800 border border-amber-200'
+          }`}
+        >
+          <Monitor className="w-4 h-4" />
+          <span>Wallpaper</span>
+        </motion.button>
+
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
           onClick={onRegenerate}
           className={`px-6 py-3 rounded-xl font-semibold flex items-center space-x-2 transition-all duration-200 ${
             isDarkMode
@@ -283,6 +425,242 @@ export default function QuoteCard({ quote, isDarkMode, onRegenerate }: QuoteCard
           <span>Regenerate</span>
         </motion.button>
       </motion.div>
+
+      {/* Download Format Modal */}
+      <AnimatePresence>
+        {showDownloadModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          >
+            <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowDownloadModal(false)} />
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className={`relative z-20 p-4 sm:p-6 lg:p-8 rounded-2xl sm:rounded-3xl border shadow-2xl w-full max-w-xs sm:max-w-lg lg:max-w-2xl mx-4 ${
+                isDarkMode 
+                  ? 'bg-slate-900 border-slate-700/50 shadow-slate-900/50' 
+                  : 'bg-white border-amber-200/50 shadow-amber-900/10'
+              }`}
+            >
+              <div className="flex items-center justify-between mb-4 sm:mb-6">
+                <h3 className={`text-lg sm:text-xl lg:text-2xl font-bold ${
+                  isDarkMode ? 'text-white' : 'text-slate-800'
+                }`}>
+                  Download Format
+                </h3>
+                <button
+                  onClick={() => setShowDownloadModal(false)}
+                  className={`p-2 rounded-full transition-colors ${
+                    isDarkMode 
+                      ? 'hover:bg-slate-700 text-slate-400' 
+                      : 'hover:bg-amber-100 text-slate-600'
+                  }`}
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <motion.button
+                    whileHover={{ scale: 1.05, y: -2 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => handleDownload(false)}
+                    className={`p-6 rounded-xl border transition-all duration-300 group ${
+                      isDarkMode
+                        ? 'bg-slate-800/60 border-slate-700/50 hover:bg-slate-700/80 hover:border-slate-600/70 text-white shadow-lg hover:shadow-xl'
+                        : 'bg-white/60 border-amber-200/50 hover:bg-amber-50/80 hover:border-amber-300/70 text-slate-800 shadow-lg hover:shadow-xl'
+                    }`}
+                  >
+                    <div className="text-center">
+                      <div className="text-lg font-bold group-hover:text-emerald-500 transition-colors duration-300">Regular Quality</div>
+                      <div className="text-sm opacity-70 mt-1">High quality JPEG</div>
+                    </div>
+                  </motion.button>
+
+                <motion.button
+                  whileHover={{ scale: 1.05, y: -2 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => handleDownload(true)}
+                  className={`p-6 rounded-xl border transition-all duration-300 group ${
+                    isDarkMode
+                      ? 'bg-gradient-to-br from-emerald-600/30 to-teal-600/30 border-emerald-500/50 hover:from-emerald-600/40 hover:to-teal-600/40 text-white shadow-lg hover:shadow-xl'
+                      : 'bg-gradient-to-br from-emerald-100 to-teal-100 border-emerald-300 hover:from-emerald-200 hover:to-teal-200 text-slate-800 shadow-lg hover:shadow-xl'
+                  }`}
+                >
+                  <div className="text-center">
+                    <div className="text-lg font-bold group-hover:text-emerald-400 transition-colors duration-300">4K Ultra HD</div>
+                    <div className="text-sm opacity-70 mt-1">Ultra high quality JPEG</div>
+                  </div>
+                </motion.button>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Wallpaper Modal */}
+      <AnimatePresence>
+        {showWallpaperModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          >
+            <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowWallpaperModal(false)} />
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className={`relative z-20 p-4 sm:p-6 lg:p-8 rounded-2xl sm:rounded-3xl border w-full max-w-xs sm:max-w-lg lg:max-w-2xl mx-4 ${
+                isDarkMode 
+                  ? 'bg-slate-800 border-slate-600/50' 
+                  : 'bg-white border-amber-200/50'
+              }`}
+            >
+              <div className="flex items-center justify-between mb-4 sm:mb-6">
+                <h3 className={`text-lg sm:text-xl lg:text-2xl font-bold ${
+                  isDarkMode ? 'text-white' : 'text-slate-800'
+                }`}>
+                  Wallpaper Generator
+                </h3>
+                <button
+                  onClick={() => setShowWallpaperModal(false)}
+                  className={`p-2 rounded-full transition-colors ${
+                    isDarkMode 
+                      ? 'hover:bg-slate-700 text-slate-400' 
+                      : 'hover:bg-amber-100 text-slate-600'
+                  }`}
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <div className="space-y-4 sm:space-y-6">
+                <div>
+                  <h4 className={`text-base sm:text-lg font-semibold mb-3 sm:mb-4 ${
+                    isDarkMode ? 'text-white' : 'text-slate-800'
+                  }`}>
+                    Choose Format
+                  </h4>
+                  <div className="grid grid-cols-2 gap-3 sm:gap-4">
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={() => setSelectedWallpaperFormat('mobile')}
+                      className={`p-4 sm:p-6 rounded-xl border transition-all ${
+                        selectedWallpaperFormat === 'mobile'
+                          ? isDarkMode
+                            ? 'bg-emerald-600 border-emerald-500 text-white'
+                            : 'bg-emerald-500 border-emerald-400 text-white'
+                          : isDarkMode
+                          ? 'bg-slate-700/50 border-slate-600 hover:bg-slate-600 text-white'
+                          : 'bg-amber-50/50 border-amber-200 hover:bg-amber-100 text-slate-800'
+                      }`}
+                    >
+                      <div className="text-center">
+                        <Smartphone className="w-8 h-8 mx-auto mb-2" />
+                        <div className="text-lg font-semibold">Mobile</div>
+                        <div className="text-sm opacity-70">9:16 (1080x1920)</div>
+                      </div>
+                    </motion.button>
+
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={() => setSelectedWallpaperFormat('desktop')}
+                      className={`p-4 sm:p-6 rounded-xl border transition-all ${
+                        selectedWallpaperFormat === 'desktop'
+                          ? isDarkMode
+                            ? 'bg-emerald-600 border-emerald-500 text-white'
+                            : 'bg-emerald-500 border-emerald-400 text-white'
+                          : isDarkMode
+                          ? 'bg-slate-700/50 border-slate-600 hover:bg-slate-600 text-white'
+                          : 'bg-amber-50/50 border-amber-200 hover:bg-amber-100 text-slate-800'
+                      }`}
+                    >
+                      <div className="text-center">
+                        <Monitor className="w-8 h-8 mx-auto mb-2" />
+                        <div className="text-lg font-semibold">Desktop</div>
+                        <div className="text-sm opacity-70">16:9 (3840x2160)</div>
+                      </div>
+                    </motion.button>
+                  </div>
+                </div>
+
+                <div>
+                  <h4 className={`text-base sm:text-lg font-semibold mb-3 sm:mb-4 ${
+                    isDarkMode ? 'text-white' : 'text-slate-800'
+                  }`}>
+                    Quality Options
+                  </h4>
+                  <div className="grid grid-cols-2 gap-3 sm:gap-4">
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={() => {
+                        if (selectedWallpaperFormat) {
+                          handleWallpaperDownload(selectedWallpaperFormat, false);
+                        } else {
+                          alert('Please select a wallpaper format (Mobile or Desktop) first');
+                        }
+                      }}
+                      disabled={!selectedWallpaperFormat}
+                      className={`p-4 sm:p-6 rounded-xl border transition-all ${
+                        !selectedWallpaperFormat
+                          ? isDarkMode
+                            ? 'bg-slate-600/50 border-slate-600 text-slate-400 cursor-not-allowed'
+                            : 'bg-slate-300/50 border-slate-300 text-slate-500 cursor-not-allowed'
+                          : isDarkMode
+                          ? 'bg-slate-800/60 border-slate-700/50 hover:bg-slate-700/80 hover:border-slate-600/70 text-white shadow-lg hover:shadow-xl'
+                          : 'bg-white/60 border-amber-200/50 hover:bg-amber-50/80 hover:border-amber-300/70 text-slate-800 shadow-lg hover:shadow-xl'
+                      }`}
+                    >
+                      <div className="text-center">
+                        <div className="text-lg font-semibold">Regular Quality</div>
+                        <div className="text-sm opacity-70">High quality JPEG</div>
+                      </div>
+                    </motion.button>
+
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => {
+                    if (selectedWallpaperFormat) {
+                      handleWallpaperDownload(selectedWallpaperFormat, true);
+                    } else {
+                      alert('Please select a wallpaper format (Mobile or Desktop) first');
+                    }
+                  }}
+                  disabled={!selectedWallpaperFormat}
+                      className={`p-4 sm:p-6 rounded-xl border transition-all ${
+                        !selectedWallpaperFormat
+                          ? isDarkMode
+                            ? 'bg-slate-600/50 border-slate-600 text-slate-400 cursor-not-allowed'
+                            : 'bg-slate-300/50 border-slate-300 text-slate-500 cursor-not-allowed'
+                          : isDarkMode
+                          ? 'bg-gradient-to-br from-emerald-600/30 to-teal-600/30 border-emerald-500/50 hover:from-emerald-600/40 hover:to-teal-600/40 text-white shadow-lg hover:shadow-xl'
+                          : 'bg-gradient-to-br from-emerald-100 to-teal-100 border-emerald-300 hover:from-emerald-200 hover:to-teal-200 text-slate-800 shadow-lg hover:shadow-xl'
+                  }`}
+                >
+                  <div className="text-center">
+                    <div className="text-lg font-semibold">4K Ultra HD</div>
+                    <div className="text-sm opacity-70">Ultra high quality JPEG</div>
+                  </div>
+                </motion.button>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 }

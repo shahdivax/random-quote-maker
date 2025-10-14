@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import { Sparkles, Moon, Sun, Quote } from 'lucide-react';
 import QuoteCard from '@/components/QuoteCard';
 import QuoteForm from '@/components/QuoteForm';
+import QuoteTemplates, { QuoteTemplate } from '@/components/QuoteTemplates';
 import { GeneratedQuote } from '@/lib/ai-service';
 
 export default function Home() {
@@ -12,6 +13,8 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(true);
   const [lastFormData, setLastFormData] = useState<Record<string, string> | null>(null);
+  const [showTemplates, setShowTemplates] = useState(false);
+  const [hasOpenModal, setHasOpenModal] = useState(false);
 
   const handleGenerateQuote = async (formData: Record<string, string>) => {
     setIsLoading(true);
@@ -43,6 +46,17 @@ export default function Home() {
     if (lastFormData) {
       await handleGenerateQuote(lastFormData);
     }
+  };
+
+  const [selectedTemplate, setSelectedTemplate] = useState<QuoteTemplate | null>(null);
+
+  const handleTemplateSelect = (template: QuoteTemplate) => {
+    setSelectedTemplate(template);
+    setShowTemplates(false);
+  };
+
+  const handleClearTemplate = () => {
+    setSelectedTemplate(null);
   };
 
   return (
@@ -116,12 +130,17 @@ export default function Home() {
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.4 }}
-            className="order-2 lg:order-1"
+            className={`order-2 lg:order-1 transition-all duration-300 ${
+              isLoading || hasOpenModal ? 'pointer-events-none opacity-50' : ''
+            }`}
           >
             <QuoteForm 
               onSubmit={handleGenerateQuote} 
               isLoading={isLoading}
               isDarkMode={isDarkMode}
+              onTemplatesClick={() => setShowTemplates(true)}
+              selectedTemplate={selectedTemplate}
+              onClearTemplate={handleClearTemplate}
             />
           </motion.div>
 
@@ -138,6 +157,7 @@ export default function Home() {
                   quote={quote} 
                   isDarkMode={isDarkMode}
                   onRegenerate={handleRegenerate}
+                  onModalStateChange={setHasOpenModal}
                 />
               ) : (
                 <div className={`aspect-[4/5] rounded-3xl border-2 border-dashed flex items-center justify-center ${
@@ -146,18 +166,51 @@ export default function Home() {
                     : 'border-amber-200 bg-amber-50/50'
                 }`}>
                   <div className="text-center">
-                    <div className={`w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center ${
-                      isDarkMode ? 'bg-slate-700' : 'bg-amber-100'
-                    }`}>
-                      <Sparkles className={`w-8 h-8 ${
-                        isDarkMode ? 'text-slate-400' : 'text-amber-400'
-                      }`} />
-                    </div>
-                    <p className={`text-lg font-medium ${
-                      isDarkMode ? 'text-slate-400' : 'text-amber-600'
-                    }`}>
-                      Your quote will appear here
-                    </p>
+                    {isLoading ? (
+                      <>
+                        <motion.div
+                          animate={{ rotate: 360 }}
+                          transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                          className={`w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center ${
+                            isDarkMode ? 'bg-slate-700' : 'bg-amber-100'
+                          }`}
+                        >
+                          <Sparkles className={`w-8 h-8 ${
+                            isDarkMode ? 'text-emerald-400' : 'text-emerald-500'
+                          }`} />
+                        </motion.div>
+                        <p className={`text-lg font-medium ${
+                          isDarkMode ? 'text-slate-300' : 'text-slate-600'
+                        }`}>
+                          Generating your quote...
+                        </p>
+                        <p className={`text-sm mt-2 ${
+                          isDarkMode ? 'text-slate-400' : 'text-slate-500'
+                        }`}>
+                          This may take a few moments
+                        </p>
+                      </>
+                    ) : (
+                      <>
+                        <div className={`w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center ${
+                          isDarkMode ? 'bg-slate-700' : 'bg-amber-100'
+                        }`}>
+                          <Sparkles className={`w-8 h-8 ${
+                            isDarkMode ? 'text-slate-400' : 'text-amber-400'
+                          }`} />
+                        </div>
+                        <p className={`text-lg font-medium ${
+                          isDarkMode ? 'text-slate-400' : 'text-amber-600'
+                        }`}>
+                          Your quote will appear here
+                        </p>
+                        <p className={`text-sm mt-2 ${
+                          isDarkMode ? 'text-slate-400' : 'text-slate-500'
+                        }`}>
+                          Fill out the form and click generate
+                        </p>
+                      </>
+                    )}
                   </div>
                 </div>
               )}
@@ -165,6 +218,15 @@ export default function Home() {
           </motion.div>
         </div>
       </main>
+
+      {/* Full-Screen Templates Modal */}
+      {showTemplates && (
+        <QuoteTemplates
+          isDarkMode={isDarkMode}
+          onTemplateSelect={handleTemplateSelect}
+          onClose={() => setShowTemplates(false)}
+        />
+      )}
     </div>
   );
 }

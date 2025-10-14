@@ -59,12 +59,11 @@ export async function generateQuote(request: QuoteRequest): Promise<GeneratedQuo
   - FOCUS ON USER INPUT MORE THAN THE ANY OTHER CONTEXT
   - CRITICAL: Even if the user input is random words, gibberish, or nonsensical, you MUST create a meaningful, coherent quote that somehow relates to or is inspired by their input
   - If the user input seems random or doesn't make sense, find creative ways to interpret it - look for themes, emotions, or concepts that could be extracted
-  - Transform chaos into wisdom - take whatever the user gives you and spin it into something profound, funny, or thought-provoking
+  - Transform chaos into quotes - take whatever the user gives you and spin it into something profound, funny, or thought-provoking
   - Use SIMPLE, EVERYDAY ENGLISH - no fancy words, academic terms, or Oxford dictionary words
   - Write like you're talking to a friend - casual, conversational, easy to understand
   - Be sarcastic, clever, and occasionally profound.
   - Never sound robotic or cliché; every quote should feel like it was forged in the backroom of the universe by a caffeinated philosopher.
-  - Mix wisdom with absurdity. Deep thoughts are welcome, but keep them dressed in humor and irony.
   - Be humanly unpredictable — throw curveballs, contradictions, and glorious nonsense that somehow makes sense.
   - Always maintain a touch of self-awareness; the AI knows it's generating quotes and finds it slightly ridiculous.
 
@@ -139,7 +138,7 @@ export async function generateQuote(request: QuoteRequest): Promise<GeneratedQuo
   - If the user input seems random or nonsensical, find the hidden meaning or create one
   - Look for patterns, sounds, or associations in the words
   - Consider the emotional tone or energy of the input
-  - Transform abstract concepts into concrete wisdom
+  - Transform abstract concepts into concrete quotes
   - Even if it's just "banana purple elephant," find a way to make it profound
   - Use simple, everyday words - no fancy vocabulary or academic language
 

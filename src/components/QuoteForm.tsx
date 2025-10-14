@@ -1,16 +1,20 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { RefreshCw, Send } from 'lucide-react';
+import { RefreshCw, Send, Palette } from 'lucide-react';
+import { QuoteTemplate } from './QuoteTemplates';
 
 interface QuoteFormProps {
   onSubmit: (data: Record<string, string>) => void;
   isLoading: boolean;
   isDarkMode: boolean;
+  onTemplatesClick: () => void;
+  selectedTemplate: QuoteTemplate | null;
+  onClearTemplate: () => void;
 }
 
-export default function QuoteForm({ onSubmit, isLoading, isDarkMode }: QuoteFormProps) {
+export default function QuoteForm({ onSubmit, isLoading, isDarkMode, onTemplatesClick, selectedTemplate, onClearTemplate }: QuoteFormProps) {
   const [formData, setFormData] = useState({
     userInput: '',
     theme: 'wisdom',
@@ -64,7 +68,24 @@ export default function QuoteForm({ onSubmit, isLoading, isDarkMode }: QuoteForm
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
+    
+    // Clear template selection if user manually changes theme or mood
+    if ((field === 'theme' || field === 'mood') && selectedTemplate) {
+      onClearTemplate();
+    }
   };
+
+  // Update form when template is selected
+  useEffect(() => {
+    if (selectedTemplate) {
+      setFormData(prev => ({
+        ...prev,
+        theme: selectedTemplate.theme,
+        mood: selectedTemplate.mood
+      }));
+    }
+  }, [selectedTemplate]);
+
 
   return (
     <motion.div
@@ -72,15 +93,34 @@ export default function QuoteForm({ onSubmit, isLoading, isDarkMode }: QuoteForm
       animate={{ opacity: 1, y: 0 }}
       className={`p-8 rounded-3xl border ${
         isDarkMode 
-          ? 'bg-slate-800/50 border-slate-700 backdrop-blur-sm' 
-          : 'bg-white/70 border-amber-200 backdrop-blur-sm'
+          ? 'bg-slate-800/50 border-slate-700' 
+          : 'bg-white/70 border-amber-200'
       }`}
     >
-      <h3 className={`text-2xl font-bold mb-6 font-classy-ui ${
-        isDarkMode ? 'text-white' : 'text-slate-800'
-      }`}>
-        Create Your Quote
-      </h3>
+      <div className="flex items-center justify-between mb-6">
+        <h3 className={`text-2xl font-bold font-classy-ui ${
+          isDarkMode ? 'text-white' : 'text-slate-800'
+        }`}>
+          Create Your Quote
+        </h3>
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={onTemplatesClick}
+          className={`px-4 py-2 rounded-xl font-medium flex items-center space-x-2 transition-all duration-200 ${
+            selectedTemplate
+              ? isDarkMode
+                ? 'bg-emerald-600 hover:bg-emerald-700 text-white'
+                : 'bg-emerald-500 hover:bg-emerald-600 text-white'
+              : isDarkMode
+              ? 'bg-slate-700 hover:bg-slate-600 text-white'
+              : 'bg-amber-100 hover:bg-amber-200 text-slate-800'
+          }`}
+        >
+          <Palette className="w-4 h-4" />
+          <span>{selectedTemplate ? selectedTemplate.name : 'Templates'}</span>
+        </motion.button>
+      </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* User Input */}
@@ -253,6 +293,7 @@ export default function QuoteForm({ onSubmit, isLoading, isDarkMode }: QuoteForm
           )}
         </motion.button>
       </form>
+
     </motion.div>
   );
 }
