@@ -66,7 +66,7 @@ export default function Home() {
               <div className="absolute -bottom-1 -left-1 w-2 h-2 bg-pink-400 rounded-full animate-pulse"></div>
             </div>
             <h1 className="text-2xl font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent font-elegant-ui">
-              AURAvibes
+              AURA vibes
             </h1>
           </motion.div>
 

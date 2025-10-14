@@ -174,7 +174,7 @@ export default function QuoteCard({ quote, isDarkMode, onRegenerate }: QuoteCard
       // Create download link
       const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
       const link = document.createElement('a');
-      link.download = `AuraVibes-quote-${timestamp}.jpg`;
+      link.download = `Aura-Vibes-quote-${timestamp}.jpg`;
       link.href = dataUrl;
       
       // Trigger download
