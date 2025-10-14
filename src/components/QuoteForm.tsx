@@ -5,7 +5,7 @@ import { motion } from 'framer-motion';
 import { RefreshCw, Send } from 'lucide-react';
 
 interface QuoteFormProps {
-  onSubmit: (data: any) => void;
+  onSubmit: (data: Record<string, string>) => void;
   isLoading: boolean;
   isDarkMode: boolean;
 }
@@ -88,7 +88,7 @@ export default function QuoteForm({ onSubmit, isLoading, isDarkMode }: QuoteForm
           <label className={`block text-sm font-medium mb-2 font-casual-ui ${
             isDarkMode ? 'text-slate-300' : 'text-slate-700'
           }`}>
-            What's on your mind? (10-15 characters)
+            What&apos;s on your mind? (10-15 characters)
           </label>
           <input
             type="text"

@@ -220,7 +220,7 @@ export default function QuoteCard({ quote, isDarkMode, onRegenerate }: QuoteCard
             transition={{ delay: 0.2 }}
             className={`mb-6 leading-relaxed ${getTypographyClasses(quote.style.typography)} ${getTextStyleClasses(quote.style.textStyle)}`}
           >
-            "{quote.quote}"
+            &ldquo;{quote.quote}&rdquo;
           </motion.div>
 
           <motion.div

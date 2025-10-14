@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Download, Sparkles, Moon, Sun, RefreshCw, Quote, MessageSquare, Zap, Brain } from 'lucide-react';
+import { Sparkles, Moon, Sun, Quote } from 'lucide-react';
 import QuoteCard from '@/components/QuoteCard';
 import QuoteForm from '@/components/QuoteForm';
 import { GeneratedQuote } from '@/lib/ai-service';
@@ -11,9 +11,9 @@ export default function Home() {
   const [quote, setQuote] = useState<GeneratedQuote | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(true);
-  const [lastFormData, setLastFormData] = useState<any>(null);
+  const [lastFormData, setLastFormData] = useState<Record<string, string> | null>(null);
 
-  const handleGenerateQuote = async (formData: any) => {
+  const handleGenerateQuote = async (formData: Record<string, string>) => {
     setIsLoading(true);
     setLastFormData(formData); // Store form data for regeneration
     try {
