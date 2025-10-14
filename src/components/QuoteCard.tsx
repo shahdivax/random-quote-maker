@@ -2,9 +2,10 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Download, RefreshCw, Sparkles, X, Monitor, Smartphone, Palette } from 'lucide-react';
+import { Download, RefreshCw, X, Monitor, Smartphone } from 'lucide-react';
 import { GeneratedQuote } from '@/lib/ai-service';
 import { toJpeg } from 'html-to-image';
+import Watermark from './Watermark';
 
 interface QuoteCardProps {
   quote: GeneratedQuote;
@@ -263,7 +264,7 @@ export default function QuoteCard({ quote, isDarkMode, onRegenerate, onModalStat
       
       // Apply wallpaper classes to text elements
       const textElements = tempElement.querySelectorAll('div');
-      textElements.forEach((element: any) => {
+      textElements.forEach((element: HTMLElement) => {
         if (element.textContent && element.textContent.includes(quote.quote)) {
           element.className = 'wallpaper-text';
         } else if (element.textContent && element.textContent.includes(quote.author)) {
@@ -360,6 +361,9 @@ export default function QuoteCard({ quote, isDarkMode, onRegenerate, onModalStat
         <div className="absolute top-6 left-6 w-2 h-2 bg-white/30 rounded-full"></div>
         <div className="absolute bottom-6 right-6 w-3 h-3 bg-white/20 rounded-full"></div>
         <div className="absolute top-1/3 right-8 w-1 h-1 bg-white/40 rounded-full"></div>
+        
+        {/* Watermark */}
+        <Watermark isDarkMode={isDarkMode} />
       </div>
 
       {/* Action Buttons */}
@@ -421,7 +425,7 @@ export default function QuoteCard({ quote, isDarkMode, onRegenerate, onModalStat
               : 'bg-white hover:bg-amber-50 text-slate-800 border border-amber-200'
           }`}
         >
-          <Sparkles className="w-4 h-4" />
+          <RefreshCw className="w-4 h-4" />
           <span>Regenerate</span>
         </motion.button>
       </motion.div>

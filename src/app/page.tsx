@@ -2,15 +2,18 @@
 
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Sparkles, Moon, Sun, Quote } from 'lucide-react';
+import { Moon, Sun, Quote } from 'lucide-react';
 import QuoteCard from '@/components/QuoteCard';
 import QuoteForm from '@/components/QuoteForm';
 import QuoteTemplates, { QuoteTemplate } from '@/components/QuoteTemplates';
+import AnimatedLogo from '@/components/AnimatedLogo';
+import SteadyLogo from '@/components/SteadyLogo';
 import { GeneratedQuote } from '@/lib/ai-service';
 
 export default function Home() {
   const [quote, setQuote] = useState<GeneratedQuote | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isRegenerating, setIsRegenerating] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(true);
   const [lastFormData, setLastFormData] = useState<Record<string, string> | null>(null);
   const [showTemplates, setShowTemplates] = useState(false);
@@ -18,6 +21,7 @@ export default function Home() {
 
   const handleGenerateQuote = async (formData: Record<string, string>) => {
     setIsLoading(true);
+    setQuote(null); // Clear the old quote immediately
     setLastFormData(formData); // Store form data for regeneration
     try {
       const response = await fetch('/api/generate-quote', {
@@ -44,7 +48,10 @@ export default function Home() {
 
   const handleRegenerate = async () => {
     if (lastFormData) {
+      setIsRegenerating(true);
+      setQuote(null); // Clear the old quote immediately
       await handleGenerateQuote(lastFormData);
+      setIsRegenerating(false);
     }
   };
 
@@ -152,7 +159,7 @@ export default function Home() {
             className="order-1 lg:order-2"
           >
             <div className="sticky top-6">
-              {quote ? (
+              {quote && !isRegenerating ? (
                 <QuoteCard 
                   quote={quote} 
                   isDarkMode={isDarkMode}
@@ -166,38 +173,33 @@ export default function Home() {
                     : 'border-amber-200 bg-amber-50/50'
                 }`}>
                   <div className="text-center">
-                    {isLoading ? (
-                      <>
-                        <motion.div
-                          animate={{ rotate: 360 }}
-                          transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                          className={`w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center ${
-                            isDarkMode ? 'bg-slate-700' : 'bg-amber-100'
-                          }`}
-                        >
-                          <Sparkles className={`w-8 h-8 ${
-                            isDarkMode ? 'text-emerald-400' : 'text-emerald-500'
-                          }`} />
-                        </motion.div>
+                    {isLoading || isRegenerating ? (
+                      <div className="flex flex-col items-center justify-center text-center">
+                        <div className="mb-6">
+                          <AnimatedLogo 
+                            isDarkMode={isDarkMode} 
+                            isAnimating={true}
+                            size="lg"
+                          />
+                        </div>
                         <p className={`text-lg font-medium ${
                           isDarkMode ? 'text-slate-300' : 'text-slate-600'
                         }`}>
-                          Generating your quote...
+                          {isRegenerating ? 'Regenerating your quote...' : 'Generating your quote...'}
                         </p>
                         <p className={`text-sm mt-2 ${
                           isDarkMode ? 'text-slate-400' : 'text-slate-500'
                         }`}>
                           This may take a few moments
                         </p>
-                      </>
+                      </div>
                     ) : (
-                      <>
-                        <div className={`w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center ${
-                          isDarkMode ? 'bg-slate-700' : 'bg-amber-100'
-                        }`}>
-                          <Sparkles className={`w-8 h-8 ${
-                            isDarkMode ? 'text-slate-400' : 'text-amber-400'
-                          }`} />
+                      <div className="flex flex-col items-center justify-center text-center">
+                        <div className="mb-6">
+                          <SteadyLogo 
+                            isDarkMode={isDarkMode} 
+                            size="lg"
+                          />
                         </div>
                         <p className={`text-lg font-medium ${
                           isDarkMode ? 'text-slate-400' : 'text-amber-600'
@@ -209,7 +211,7 @@ export default function Home() {
                         }`}>
                           Fill out the form and click generate
                         </p>
-                      </>
+                      </div>
                     )}
                   </div>
                 </div>

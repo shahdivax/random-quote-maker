@@ -1,6 +1,5 @@
 'use client';
 
-import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Heart, Star, Lightbulb, Target, Zap, Shield, TreePine } from 'lucide-react';
 
@@ -95,10 +94,8 @@ const templates: QuoteTemplate[] = [
 ];
 
 export default function QuoteTemplates({ isDarkMode, onTemplateSelect, onClose }: QuoteTemplatesProps) {
-  const [selectedTemplate, setSelectedTemplate] = useState<QuoteTemplate | null>(null);
 
   const handleTemplateClick = (template: QuoteTemplate) => {
-    setSelectedTemplate(template);
     onTemplateSelect(template);
     onClose();
   };
@@ -189,7 +186,7 @@ export default function QuoteTemplates({ isDarkMode, onTemplateSelect, onClose }
             <p className={`text-center text-sm ${
               isDarkMode ? 'text-slate-400' : 'text-slate-500'
             }`}>
-              Choose a template to automatically set your quote's theme, mood, and styling
+              Choose a template to automatically set your quote&apos;s theme, mood, and styling
             </p>
           </div>
         </motion.div>
