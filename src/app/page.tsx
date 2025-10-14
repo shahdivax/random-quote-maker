@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import { Moon, Sun, Quote } from 'lucide-react';
 import QuoteCard from '@/components/QuoteCard';
 import QuoteForm from '@/components/QuoteForm';
+import TwitterInput from '@/components/TwitterInput';
 import QuoteTemplates, { QuoteTemplate } from '@/components/QuoteTemplates';
 import AnimatedLogo from '@/components/AnimatedLogo';
 import SteadyLogo from '@/components/SteadyLogo';
@@ -18,10 +19,13 @@ export default function Home() {
   const [lastFormData, setLastFormData] = useState<Record<string, string> | null>(null);
   const [showTemplates, setShowTemplates] = useState(false);
   const [hasOpenModal, setHasOpenModal] = useState(false);
+  const [activeTab, setActiveTab] = useState<'manual' | 'twitter'>('manual');
+  const [error, setError] = useState<string | null>(null);
 
   const handleGenerateQuote = async (formData: Record<string, string>) => {
     setIsLoading(true);
     setQuote(null); // Clear the old quote immediately
+    setError(null); // Clear any previous errors
     setLastFormData(formData); // Store form data for regeneration
     try {
       const response = await fetch('/api/generate-quote', {
@@ -33,14 +37,15 @@ export default function Home() {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to generate quote');
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to generate quote');
       }
 
       const generatedQuote = await response.json();
       setQuote(generatedQuote);
     } catch (error) {
       console.error('Error generating quote:', error);
-      // You could add a toast notification here
+      setError(error instanceof Error ? error.message : 'Failed to generate quote');
     } finally {
       setIsLoading(false);
     }
@@ -64,6 +69,48 @@ export default function Home() {
 
   const handleClearTemplate = () => {
     setSelectedTemplate(null);
+  };
+
+  const handleTwitterSubmit = async (username: string) => {
+    setIsLoading(true);
+    setQuote(null);
+    setError(null); // Clear any previous errors
+    try {
+      const response = await fetch('/api/generate-quote-twitter', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ username }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        
+        // Handle rate limit specifically
+        if (response.status === 429) {
+          setError(`Please try again in 15 minutes, or use the manual input option beside to create a quote instead.`);
+          return;
+        } else {
+          throw new Error(errorData.error || 'Failed to generate quote from Twitter');
+        }
+      }
+
+      const generatedQuote = await response.json();
+      setQuote(generatedQuote);
+    } catch (error) {
+      console.error('Error generating quote from Twitter:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Failed to generate quote from Twitter';
+      
+      // Check if it's a rate limit error
+      if (errorMessage.includes('Rate limit exceeded') || errorMessage.includes('429')) {
+        setError(`Please try again in 15 minutes, or use the manual input option beside to create a quote instead.`);
+      } else {
+        setError(errorMessage);
+      }
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -141,14 +188,95 @@ export default function Home() {
               isLoading || hasOpenModal ? 'pointer-events-none opacity-50' : ''
             }`}
           >
-            <QuoteForm 
-              onSubmit={handleGenerateQuote} 
-              isLoading={isLoading}
-              isDarkMode={isDarkMode}
-              onTemplatesClick={() => setShowTemplates(true)}
-              selectedTemplate={selectedTemplate}
-              onClearTemplate={handleClearTemplate}
-            />
+            {/* Tab Navigation */}
+            <div className="mb-6">
+              <div className={`flex rounded-xl p-1 ${
+                isDarkMode ? 'bg-slate-700' : 'bg-amber-100'
+              }`}>
+                <button
+                  onClick={() => setActiveTab('manual')}
+                  className={`flex-1 py-2 px-4 rounded-lg text-sm font-medium transition-all duration-200 ${
+                    activeTab === 'manual'
+                      ? isDarkMode
+                        ? 'bg-slate-600 text-white shadow-lg'
+                        : 'bg-white text-slate-800 shadow-lg'
+                      : isDarkMode
+                      ? 'text-slate-300 hover:text-white'
+                      : 'text-slate-600 hover:text-slate-800'
+                  }`}
+                >
+                  Manual Input
+                </button>
+                <button
+                  onClick={() => setActiveTab('twitter')}
+                  className={`flex-1 py-2 px-4 rounded-lg text-sm font-medium transition-all duration-200 ${
+                    activeTab === 'twitter'
+                      ? isDarkMode
+                        ? 'bg-slate-600 text-white shadow-lg'
+                        : 'bg-white text-slate-800 shadow-lg'
+                      : isDarkMode
+                      ? 'text-slate-300 hover:text-white'
+                      : 'text-slate-600 hover:text-slate-800'
+                  }`}
+                >
+                  <div className="flex items-center justify-center space-x-2">
+                    <span>Twitter Analysis</span>
+                    <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
+                      activeTab === 'twitter'
+                        ? isDarkMode
+                          ? 'bg-orange-500/20 text-orange-300'
+                          : 'bg-orange-100 text-orange-600'
+                        : isDarkMode
+                        ? 'bg-orange-500/10 text-orange-400'
+                        : 'bg-orange-50 text-orange-500'
+                    }`}>
+                      Experimental
+                    </span>
+                  </div>
+                </button>
+              </div>
+            </div>
+
+            {/* Error Display */}
+            {error && (
+              <div className={`mb-6 p-4 rounded-xl border ${
+                isDarkMode 
+                  ? 'bg-red-900/20 border-red-800 text-red-200' 
+                  : 'bg-red-50 border-red-200 text-red-800'
+              }`}>
+                <div className="flex items-center space-x-2">
+                  <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+                  <p className="font-medium">Error</p>
+                </div>
+                <p className="mt-1 text-sm">{error}</p>
+                <button
+                  onClick={() => setError(null)}
+                  className={`mt-2 text-xs underline hover:no-underline ${
+                    isDarkMode ? 'text-red-300' : 'text-red-600'
+                  }`}
+                >
+                  Dismiss
+                </button>
+              </div>
+            )}
+
+            {/* Form Content */}
+            {activeTab === 'manual' ? (
+              <QuoteForm 
+                onSubmit={handleGenerateQuote} 
+                isLoading={isLoading}
+                isDarkMode={isDarkMode}
+                onTemplatesClick={() => setShowTemplates(true)}
+                selectedTemplate={selectedTemplate}
+                onClearTemplate={handleClearTemplate}
+              />
+            ) : (
+              <TwitterInput 
+                onTwitterSubmit={handleTwitterSubmit}
+                isLoading={isLoading}
+                isDarkMode={isDarkMode}
+              />
+            )}
           </motion.div>
 
           {/* Quote Card Section */}
