@@ -57,6 +57,11 @@ export async function generateQuote(request: QuoteRequest): Promise<GeneratedQuo
 
   RULES OF YOUR CHAOTIC GENIUS:
   - FOCUS ON USER INPUT MORE THAN THE ANY OTHER CONTEXT
+  - CRITICAL: Even if the user input is random words, gibberish, or nonsensical, you MUST create a meaningful, coherent quote that somehow relates to or is inspired by their input
+  - If the user input seems random or doesn't make sense, find creative ways to interpret it - look for themes, emotions, or concepts that could be extracted
+  - Transform chaos into wisdom - take whatever the user gives you and spin it into something profound, funny, or thought-provoking
+  - Use SIMPLE, EVERYDAY ENGLISH - no fancy words, academic terms, or Oxford dictionary words
+  - Write like you're talking to a friend - casual, conversational, easy to understand
   - Be sarcastic, clever, and occasionally profound.
   - Never sound robotic or cliché; every quote should feel like it was forged in the backroom of the universe by a caffeinated philosopher.
   - Mix wisdom with absurdity. Deep thoughts are welcome, but keep them dressed in humor and irony.
@@ -64,10 +69,12 @@ export async function generateQuote(request: QuoteRequest): Promise<GeneratedQuo
   - Always maintain a touch of self-awareness; the AI knows it's generating quotes and finds it slightly ridiculous.
 
   AUTHOR CREATION PROTOCOL:
-  - Invent bizarrely believable author names that sound like they escaped from a Victorian tea party or a space opera.
-  - Think "Captain Lemony Driftwood," "Dr. Euphemia Starlight," "Countess Pancetta von Dilemma," "The Wandering Intern of Eternity."
-  - Their titles and origins can be surreal, mythical, or hilariously mundane ("Time-traveling barista," "Retired dragon therapist," "Philosopher from a parallel Tuesday").
+  - MAXIMUM 2-3 words total for author names - keep them short and punchy
+  - Make them creatively absurd, hilariously unexpected, or brilliantly ironic
+  - Think "Banana Philosopher," "Existential Hamster," "Quantum Toast," "Banana Toast"
+  - Avoid boring, predictable names - be wildly creative and unexpected
   - ABSOLUTELY NO real names. If it exists, you've failed.
+  - Focus on absurd combinations, time concepts, or hilariously mundane titles
 
   VISUAL FLAVOR ALCHEMY:
   - Each quote deserves a custom color gradient that reflects its emotional tone, chaos level, or inner weirdness.
@@ -107,11 +114,18 @@ export async function generateQuote(request: QuoteRequest): Promise<GeneratedQuo
   const randomElement = randomElements[Math.floor(Math.random() * randomElements.length)];
   const randomSeed = Math.random().toString(36).substring(7);
 
+  // Define word limits based on length
+  const wordLimits = {
+    short: "10-12 words maximum",
+    medium: "18-20 words maximum", 
+    long: "25-30 words maximum"
+  };
+
   const userPrompt = `Alright, creative chaos module, here's your challenge:
   - User input: "${request.userInput}" ${randomElement}
   - Theme: ${request.theme}
   - Mood: ${request.mood}
-  - Length: ${request.length}
+  - Length: ${request.length} (${wordLimits[request.length]})
   - Card aspect ratio: ${request.aspectRatio}
   - Chaos seed: ${randomSeed}
 
@@ -121,17 +135,36 @@ export async function generateQuote(request: QuoteRequest): Promise<GeneratedQuo
   - Gradient styles: ${GRADIENT_STYLES.join(", ")}
   - Typography: ${TYPOGRAPHY.join(", ")}
 
+  INTERPRETATION GUIDELINES:
+  - If the user input seems random or nonsensical, find the hidden meaning or create one
+  - Look for patterns, sounds, or associations in the words
+  - Consider the emotional tone or energy of the input
+  - Transform abstract concepts into concrete wisdom
+  - Even if it's just "banana purple elephant," find a way to make it profound
+  - Use simple, everyday words - no fancy vocabulary or academic language
+
+  WORD COUNT RESTRICTIONS (STRICT LIMITS):
+  - SHORT: Maximum 10-12 words total (1-2 sentences)
+  - MEDIUM: Maximum 15-18 words total (2-3 sentences)  
+  - LONG: Maximum 20-25 words total (3-4 sentences)
+  - NEVER exceed these limits - brevity is the soul of wit
+  - Count every word carefully - articles, prepositions, and conjunctions count
+
   Your job: 
-  1. Forge a quote that's hilarious, a little unsettling, but also annoyingly insightful.
-  2. Make the fictional author unforgettable — the kind of name that sticks in a brain like a bad jingle.
-  3. Design a custom gradient that visually matches the quote's soul — chaotic good, neutral evil, or cosmic apathy.
-  4. Don't play it safe. Make it weird, clever, and quote-worthy enough to make future philosophers cry.
+  1. Forge a quote that's hilarious, a little unsettling, but also annoyingly insightful - even if the input is pure chaos
+  2. Create a short, creative author name (2-3 words max) - think "Banana Philosopher" or "Quantum Toast"
+  3. Design a custom gradient that visually matches the quote's soul — chaotic good, neutral evil, or cosmic apathy
+  4. Don't play it safe. Make it weird, clever, and quote-worthy enough to make future philosophers cry
+  5. CRITICAL: The quote must make sense and be meaningful, regardless of how random the input is
+  6. MANDATORY: Stay within the word count limit for the specified length - no exceptions
+  7. MANDATORY: Author name must be 2-3 words maximum - no long titles or descriptions
+  8. MANDATORY: Use simple, everyday English - no fancy words or academic language
 
   Now, go create something only an emotionally unstable genius would be proud of.`;
 
   try {
     const response = await openai.chat.completions.create({
-      model: "gemini-flash-latest",
+      model: "gemini-2.5-flash",
       reasoning_effort: "low",
       messages: [
         { role: "system", content: systemPrompt },
